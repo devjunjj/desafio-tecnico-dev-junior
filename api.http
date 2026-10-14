@@ -1,0 +1,23 @@
+### Exemplo do enunciado (200)
+POST http://localhost:5000/api/professores/busca
+Content-Type: application/json
+
+{
+  "idioma": "Espanhol",
+  "dias": ["segunda"],
+  "inicioFaixa": "18:00",
+  "fimFaixa": "20:00",
+  "duracaoMinutos": 60
+}
+
+### Pedido inválido (400)
+POST http://localhost:5000/api/professores/busca
+Content-Type: application/json
+
+{
+  "idioma": "",
+  "dias": [],
+  "inicioFaixa": "25:00",
+  "fimFaixa": "18:00",
+  "duracaoMinutos": 45
+}

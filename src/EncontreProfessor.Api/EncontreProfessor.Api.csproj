@@ -4,6 +4,10 @@
     <ProjectReference Include="..\EncontreProfessor.Core\EncontreProfessor.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="..\..\professores.json" Link="professores.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
