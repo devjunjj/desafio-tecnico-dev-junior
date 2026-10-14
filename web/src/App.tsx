@@ -1,3 +1,4 @@
+import { Resultado } from './Resultado'
 import { useState } from 'react'
 import { buscarProfessores, type BuscaRequest, type ResultadoApi } from './api'
 import { FormularioBusca } from './FormularioBusca'
@@ -19,7 +20,7 @@ function App() {
     <main>
       <h1>Encontre um professor</h1>
       <FormularioBusca carregando={carregando} onBuscar={buscar} />
-      <pre>{JSON.stringify(resultado, null, 2)}</pre>
+      <Resultado carregando={carregando} resultado={resultado} />
     </main>
   )
 }
