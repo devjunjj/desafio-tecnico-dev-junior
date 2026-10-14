@@ -1,23 +1,24 @@
 import { useState } from 'react'
-import { buscarProfessores, type ResultadoApi } from './api'
+import { buscarProfessores, type BuscaRequest, type ResultadoApi } from './api'
+import { FormularioBusca } from './FormularioBusca'
 
 function App() {
+  const [carregando, setCarregando] = useState(false)
   const [resultado, setResultado] = useState<ResultadoApi | null>(null)
 
-  async function testar() {
-    const resposta = await buscarProfessores({
-      idioma: 'Espanhol',
-      dias: ['segunda'],
-      inicioFaixa: '18:00',
-      fimFaixa: '20:00',
-      duracaoMinutos: 60,
-    })
-    setResultado(resposta)
+  async function buscar(pedido: BuscaRequest) {
+    setCarregando(true)
+    try {
+      setResultado(await buscarProfessores(pedido))
+    } finally {
+      setCarregando(false)
+    }
   }
 
   return (
     <main>
-      <button onClick={testar}>Testar API</button>
+      <h1>Encontre um professor</h1>
+      <FormularioBusca carregando={carregando} onBuscar={buscar} />
       <pre>{JSON.stringify(resultado, null, 2)}</pre>
     </main>
   )
