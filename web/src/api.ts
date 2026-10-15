@@ -31,23 +31,6 @@ export type ResultadoApi =
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5000'
 
-async function lerJson(resposta: Response): Promise<unknown> {
-  try {
-    return await resposta.json()
-  } catch {
-    return null
-  }
-}
-
-function temErros(corpo: unknown): corpo is { erros: string[] } {
-  return (
-    typeof corpo === 'object' &&
-    corpo !== null &&
-    'erros' in corpo &&
-    Array.isArray((corpo as { erros: unknown }).erros)
-  )
-}
-
 export async function buscarProfessores(pedido: BuscaRequest): Promise<ResultadoApi> {
   let resposta: Response
 
@@ -67,7 +50,10 @@ export async function buscarProfessores(pedido: BuscaRequest): Promise<Resultado
   const corpo = await lerJson(resposta)
 
   if (resposta.ok) {
-    return { tipo: 'sucesso', dados: corpo as BuscaResponse }
+    if (ehBuscaResponse(corpo)) {
+      return { tipo: 'sucesso', dados: corpo }
+    }
+    return { tipo: 'falha', mensagem: 'A API respondeu em um formato inesperado.' }
   }
 
   if (resposta.status === 400 && temErros(corpo)) {
@@ -75,4 +61,56 @@ export async function buscarProfessores(pedido: BuscaRequest): Promise<Resultado
   }
 
   return { tipo: 'falha', mensagem: `A API respondeu com erro (${resposta.status}).` }
+}
+
+async function lerJson(resposta: Response): Promise<unknown> {
+  try {
+    return await resposta.json()
+  } catch {
+    return null
+  }
+}
+
+// Conferências do formato da resposta. A API é externa à tela,
+// então os dados são checados antes de serem usados.
+
+function ehObjeto(valor: unknown): valor is Record<string, unknown> {
+  return typeof valor === 'object' && valor !== null
+}
+
+function ehListaDeTextos(valor: unknown): valor is string[] {
+  return Array.isArray(valor) && valor.every((item) => typeof item === 'string')
+}
+
+function temErros(valor: unknown): valor is { erros: string[] } {
+  return ehObjeto(valor) && ehListaDeTextos(valor.erros)
+}
+
+function ehProfessorDisponivel(valor: unknown): valor is ProfessorDisponivel {
+  return (
+    ehObjeto(valor) &&
+    typeof valor.id === 'number' &&
+    typeof valor.nome === 'string' &&
+    typeof valor.aulasNaSemana === 'number' &&
+    ehListaDeTextos(valor.horarios)
+  )
+}
+
+function ehProfessorNaoElegivel(valor: unknown): valor is ProfessorNaoElegivel {
+  return (
+    ehObjeto(valor) &&
+    typeof valor.id === 'number' &&
+    typeof valor.nome === 'string' &&
+    typeof valor.motivo === 'string'
+  )
+}
+
+function ehBuscaResponse(valor: unknown): valor is BuscaResponse {
+  return (
+    ehObjeto(valor) &&
+    Array.isArray(valor.professores) &&
+    valor.professores.every(ehProfessorDisponivel) &&
+    Array.isArray(valor.naoElegiveis) &&
+    valor.naoElegiveis.every(ehProfessorNaoElegivel)
+  )
 }
