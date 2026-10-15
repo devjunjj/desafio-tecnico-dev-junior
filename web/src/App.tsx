@@ -1,7 +1,7 @@
-import { Resultado } from './Resultado'
 import { useState } from 'react'
 import { buscarProfessores, type BuscaRequest, type ResultadoApi } from './api'
 import { FormularioBusca } from './FormularioBusca'
+import { Resultado } from './Resultado'
 
 function App() {
   const [carregando, setCarregando] = useState(false)
@@ -17,10 +17,18 @@ function App() {
   }
 
   return (
-    <main>
-      <h1>Encontre um professor</h1>
-      <FormularioBusca carregando={carregando} onBuscar={buscar} />
-      <Resultado carregando={carregando} resultado={resultado} />
+    <main className="pagina">
+      <header className="cabecalho">
+        <h1>Encontre um professor</h1>
+        <p>Informe o idioma, os dias e o horário do aluno para ver quem pode dar a aula.</p>
+      </header>
+
+      <div className="conteudo">
+        <FormularioBusca carregando={carregando} onBuscar={buscar} />
+        <div className="resultados" aria-live="polite">
+          <Resultado carregando={carregando} resultado={resultado} />
+        </div>
+      </div>
     </main>
   )
 }

@@ -1,34 +1,28 @@
 :root {
-  --fundo: #f4f6fa;
-  --superficie: #ffffff;
-  --texto: #1d2330;
-  --texto-suave: #5a6477;
-  --borda: #d6dbe6;
-  --destaque: #2f5fd0;
-  --destaque-texto: #ffffff;
-  --erro-fundo: #fdecec;
-  --erro-borda: #e3a1a1;
-  --erro-texto: #861f1f;
+  --papel: #ffffff;
+  --tinta: #1c2b5a;
+  --tinta-suave: #5d6a8f;
+  --pauta: #d5dcec;
+  --margem: #e0565b;
+  --erro: #b3261e;
 
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  line-height: 1.5;
-  color: var(--texto);
-  background: var(--fundo);
-  color-scheme: light dark;
+  font-family: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--tinta);
+  background: var(--papel);
+  color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --fundo: #14171d;
-    --superficie: #1d212a;
-    --texto: #e8ebf2;
-    --texto-suave: #a3abbb;
-    --borda: #343a48;
-    --destaque: #7f9fff;
-    --destaque-texto: #0d1220;
-    --erro-fundo: #3a1e20;
-    --erro-borda: #7b3b3e;
-    --erro-texto: #ffb8b8;
+    --papel: #151b2c;
+    --tinta: #e6eaf5;
+    --tinta-suave: #9aa5c2;
+    --pauta: #2c3550;
+    --margem: #e8777b;
+    --erro: #ff8a80;
+    color-scheme: dark;
   }
 }
 
@@ -38,121 +32,160 @@
 
 body {
   margin: 0;
-  background: var(--fundo);
+  background: var(--papel);
 }
 
-main {
-  max-width: 760px;
+/* A linha vermelha de margem do caderno acompanha a página inteira. */
+.pagina {
+  max-width: 1080px;
+  min-height: 100vh;
   margin: 0 auto;
-  padding: 32px 16px 64px;
+  padding: 48px 32px 64px 64px;
+  border-left: 2px solid var(--margem);
+}
+
+.cabecalho {
+  max-width: 40em;
+  margin-bottom: 40px;
 }
 
 h1 {
-  margin: 0 0 24px;
-  font-size: 1.75rem;
+  margin: 0 0 8px;
+  font-size: 2.25rem;
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+
+.cabecalho p {
+  margin: 0;
+  color: var(--tinta-suave);
 }
 
 h2 {
-  margin: 32px 0 12px;
+  margin: 0 0 8px;
   font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.conteudo {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) 1fr;
+  gap: 56px;
+  align-items: start;
 }
 
 /* Formulário */
 
 .formulario {
   display: grid;
-  gap: 16px;
-  padding: 20px;
-  background: var(--superficie);
-  border: 1px solid var(--borda);
-  border-radius: 12px;
+  gap: 20px;
 }
 
 .formulario > label,
 .linha > label {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   gap: 6px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .linha {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 12px;
 }
 
 select,
 input[type='time'] {
+  width: 100%;
   padding: 8px 10px;
   font: inherit;
   font-weight: 400;
   color: inherit;
-  background: var(--superficie);
-  border: 1px solid var(--borda);
-  border-radius: 8px;
+  background: var(--papel);
+  border: 1px solid var(--pauta);
+  border-radius: 4px;
 }
 
-fieldset {
-  margin: 0;
-  padding: 10px 14px 12px;
-  border: 1px solid var(--borda);
-  border-radius: 8px;
-}
-
-legend {
-  padding: 0 6px;
-  font-weight: 600;
-}
-
-.opcao {
-  display: inline-flex;
-  align-items: center;
+.dias {
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
-  margin-right: 16px;
-  font-weight: 400;
+  margin: 0;
+  padding: 0;
+  border: none;
 }
 
-input[type='checkbox'] {
-  accent-color: var(--destaque);
+.dias legend {
+  margin-bottom: 6px;
+  padding: 0;
+  font-weight: 700;
+}
+
+/* Cada dia é um botão de alternar; a caixinha fica invisível, mas continua acessível. */
+.opcao {
+  position: relative;
+  padding: 6px 12px;
+  border: 1px solid var(--pauta);
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.opcao input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.opcao:has(input:checked) {
+  color: var(--papel);
+  background: var(--tinta);
+  border-color: var(--tinta);
+}
+
+.opcao:has(input:focus-visible) {
+  outline: 2px solid var(--tinta);
+  outline-offset: 2px;
 }
 
 button {
   justify-self: start;
-  padding: 10px 18px;
+  padding: 10px 20px;
   font: inherit;
-  font-weight: 600;
-  color: var(--destaque-texto);
-  background: var(--destaque);
+  font-weight: 700;
+  color: var(--papel);
+  background: var(--tinta);
   border: none;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
 }
 
 button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  opacity: 0.55;
+  cursor: progress;
 }
 
 :focus-visible {
-  outline: 2px solid var(--destaque);
+  outline: 2px solid var(--tinta);
   outline-offset: 2px;
 }
 
 /* Mensagens de estado */
 
 .mensagem {
-  margin: 24px 0 0;
-  padding: 12px 16px;
-  background: var(--superficie);
-  border: 1px solid var(--borda);
-  border-radius: 8px;
+  margin: 0;
+  padding: 10px 0;
+  color: var(--tinta-suave);
+  border-top: 1px solid var(--pauta);
+  border-bottom: 1px solid var(--pauta);
 }
 
 .mensagem.erro {
-  color: var(--erro-texto);
-  background: var(--erro-fundo);
-  border-color: var(--erro-borda);
+  padding-left: 14px;
+  color: var(--erro);
+  border: none;
+  border-left: 3px solid var(--erro);
 }
 
 .mensagem p {
@@ -160,39 +193,41 @@ button:disabled {
 }
 
 .mensagem ul {
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   padding-left: 20px;
 }
 
-/* Resultado */
+/* Resultado: cada professor é uma linha da pauta do caderno. */
 
 .professores {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
-  margin: 0;
+  margin: 0 0 40px;
   padding: 0;
   list-style: none;
+  border-top: 1px solid var(--pauta);
 }
 
-.cartao {
-  padding: 16px;
-  background: var(--superficie);
-  border: 1px solid var(--borda);
-  border-radius: 12px;
+.professor {
+  display: grid;
+  grid-template-columns: 11em 1fr;
+  gap: 16px;
+  align-items: baseline;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--pauta);
 }
 
-.cartao h3 {
-  margin: 0 0 2px;
-  font-size: 1.05rem;
+.professor h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
-.cartao p {
-  margin: 0 0 12px;
-  color: var(--texto-suave);
+.professor p {
+  margin: 0;
   font-size: 0.9rem;
+  color: var(--tinta-suave);
 }
 
+/* Os horários livres usam a mesma caixinha dos botões de dia. */
 .horarios {
   display: flex;
   flex-wrap: wrap;
@@ -203,19 +238,39 @@ button:disabled {
 }
 
 .horarios li {
-  padding: 2px 10px;
-  color: var(--destaque);
-  font-variant-numeric: tabular-nums;
-  border: 1px solid var(--destaque);
-  border-radius: 999px;
+  padding: 3px 10px;
+  font-weight: 700;
+  border: 1px solid var(--pauta);
+  border-radius: 4px;
 }
 
 .nao-elegiveis ul {
   margin: 0;
-  padding-left: 20px;
-  color: var(--texto-suave);
+  padding-left: 18px;
+  color: var(--tinta-suave);
 }
 
 .nao-elegiveis strong {
-  color: var(--texto);
+  color: var(--tinta);
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .pagina {
+    padding: 28px 16px 48px 24px;
+  }
+
+  h1 {
+    font-size: 1.8rem;
+  }
+
+  .conteudo {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .professor {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
 }

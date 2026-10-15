@@ -15,7 +15,7 @@ export function Resultado({ carregando, resultado }: Props) {
   }
 
   if (resultado === null) {
-    return null
+    return <p className="mensagem">Os professores disponíveis aparecem aqui depois da busca.</p>
   }
 
   if (resultado.tipo === 'falha') {
@@ -42,7 +42,7 @@ export function Resultado({ carregando, resultado }: Props) {
   const { professores, naoElegiveis } = resultado.dados
 
   return (
-    <section className="resultado">
+    <section>
       {professores.length === 0 ? (
         <p className="mensagem">Nenhum professor disponível para esse pedido.</p>
       ) : (
@@ -50,7 +50,7 @@ export function Resultado({ carregando, resultado }: Props) {
           <h2>Professores disponíveis</h2>
           <ul className="professores">
             {professores.map((professor) => (
-              <CartaoProfessor key={professor.id} professor={professor} />
+              <LinhaProfessor key={professor.id} professor={professor} />
             ))}
           </ul>
         </>
@@ -61,16 +61,18 @@ export function Resultado({ carregando, resultado }: Props) {
   )
 }
 
-function CartaoProfessor({ professor }: { professor: ProfessorDisponivel }) {
+function LinhaProfessor({ professor }: { professor: ProfessorDisponivel }) {
   const aulas = professor.aulasNaSemana
 
   return (
-    <li className="cartao">
-      <h3>{professor.nome}</h3>
-      <p>
-        {aulas} {aulas === 1 ? 'aula' : 'aulas'} na semana
-      </p>
-      <ul className="horarios">
+    <li className="professor">
+      <div>
+        <h3>{professor.nome}</h3>
+        <p>
+          {aulas} {aulas === 1 ? 'aula' : 'aulas'} na semana
+        </p>
+      </div>
+      <ul className="horarios" aria-label={`Horários de ${professor.nome}`}>
         {professor.horarios.map((horario) => (
           <li key={horario}>{horario}</li>
         ))}

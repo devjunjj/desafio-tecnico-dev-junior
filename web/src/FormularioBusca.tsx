@@ -51,7 +51,7 @@ export function FormularioBusca({ carregando, onBuscar }: Props) {
         </select>
       </label>
 
-      <fieldset>
+      <fieldset className="dias">
         <legend>Dias da semana</legend>
         {DIAS.map((dia) => (
           <label key={dia.valor} className="opcao">
