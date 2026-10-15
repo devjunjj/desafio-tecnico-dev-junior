@@ -1,130 +1,107 @@
-# Desafio técnico: Encontre um Professor
+# Encontre um Professor
 
-## Contexto
+Solução do desafio técnico para pessoa desenvolvedora júnior: uma API em C# (.NET 8) que encontra professores disponíveis para um novo aluno e uma tela em React (TypeScript) para usá-la.
 
-Uma escola de idiomas precisa encontrar professores disponíveis para cada novo aluno. O aluno informa o idioma, os dias da semana, a faixa de horário em que pode ter aula e a duração da aula; o sistema devolve os professores que conseguem atendê-lo e em quais horários.
+## Como rodar
 
-Você vai construir uma API em C# que resolve essa busca e uma tela em React para usá-la.
+### Pré-requisitos
 
-**Estimativa:** 6 a 8 horas de trabalho. O prazo de entrega é informado no convite do processo seletivo.
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Node.js](https://nodejs.org) LTS (testado com a versão 24)
 
-## Como começar
+### API
 
-1. Clique em **Use this template** para criar o seu próprio repositório a partir deste.
-2. Desenvolva a solução no seu repositório.
-3. Envie o link pelo mesmo canal em que recebeu o desafio. O repositório precisa estar público ou com acesso liberado para quem enviou o desafio.
+Na raiz do repositório:
 
-## Dados
-
-Os professores estão em [`professores.json`](professores.json). Carregue-os desse arquivo; você pode mantê-los em memória.
-
-Cada professor tem:
-
-| Campo | Descrição |
-|---|---|
-| `id`, `nome` | Identificação do professor |
-| `idiomas` | Idiomas que ele ensina |
-| `agendaBloqueada` | Quando `true`, o professor não pode receber novos alunos |
-| `disponibilidade` | Blocos semanais em que ele pode dar aula (`dia`, `inicio`, `fim`) |
-| `aulasMarcadas` | Aulas que ele já tem na semana (`dia`, `inicio`, `duracaoMinutos`) |
-
-**Garantias dos dados:**
-
-- Horários no formato `HH:mm`.
-- Nada atravessa a meia-noite.
-- Blocos de disponibilidade de um mesmo dia nunca se sobrepõem nem se encostam.
-- Dias da semana: `segunda`, `terca`, `quarta`, `quinta`, `sexta`, `sabado`, `domingo`.
-
-## O que construir
-
-### 1. API (C# e .NET 8)
-
-`POST /api/professores/busca`
-
-**Requisição:**
-
-```json
-{
-  "idioma": "Espanhol",
-  "dias": ["segunda"],
-  "inicioFaixa": "18:00",
-  "fimFaixa": "20:00",
-  "duracaoMinutos": 60
-}
+```
+dotnet run --project src/EncontreProfessor.Api --urls http://localhost:5000
 ```
 
-**Resposta:**
+Endpoint: `POST http://localhost:5000/api/professores/busca`. O arquivo `api.http` tem exemplos de requisição (pode ser usado com a extensão REST Client do VS Code).
 
-```json
-{
-  "professores": [
-    { "id": 1, "nome": "Ana",   "aulasNaSemana": 1, "horarios": ["18:00"] },
-    { "id": 4, "nome": "Diego", "aulasNaSemana": 1, "horarios": ["18:00", "18:30", "19:00"] }
-  ],
-  "naoElegiveis": [
-    { "id": 2, "nome": "Bruno", "motivo": "Não ensina o idioma" }
-  ]
-}
+### Tela
+
+Com a API rodando, em outro terminal:
+
+```
+cd web
+npm install
+npm run dev
 ```
 
-A lista `naoElegiveis` do exemplo está resumida a um item.
+Acesse `http://localhost:5173`. A tela chama a API em `http://localhost:5000`; para usar outro endereço, defina a variável de ambiente `VITE_API_URL`.
 
-### 2. Regras da busca
+> No Windows, se o PowerShell bloquear o `npm` com erro de "execução de scripts", rode uma vez: `Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned`.
 
-1. O professor precisa ensinar o idioma pedido.
-2. Professor com agenda bloqueada não aparece.
-3. **O aluno quer horário fixo:** o mesmo horário de início precisa estar livre em **todos** os dias pedidos.
-4. A aula precisa caber **inteira** dentro de um bloco de disponibilidade do professor e dentro da faixa pedida pelo aluno.
-5. A aula não pode se sobrepor a uma aula já marcada. **Encostar é permitido:** uma aula que termina às 19:00 permite outra começando às 19:00.
-6. A aula só pode começar em hora cheia ou meia hora (`:00` ou `:30`).
-7. **Ordenação:** primeiro quem tem menos aulas marcadas na semana; em caso de empate, ordem alfabética do nome. Os horários de cada professor vêm em ordem crescente.
+## Testes
 
-**Diferencial:** preencher `naoElegiveis` com o motivo de cada professor que ficou de fora, usando exatamente um destes textos:
+### API e regras de negócio (C#)
 
-- `Não ensina o idioma`
-- `Agenda bloqueada`
-- `Sem horário em comum nos dias pedidos`
+Na raiz do repositório:
 
-Quando houver mais de um motivo, informe o primeiro nessa ordem.
+```
+dotnet test
+```
 
-### 3. Validação
+São 28 testes (xUnit), e nenhum depende de subir a API manualmente:
 
-A API responde **400** com uma mensagem clara quando:
+- **22 testes de unidade** do `Core`: regras da busca, validação e conversão de horários, incluindo os casos de fronteira (aula que encosta em outra pelos dois lados, aula que não cabe no bloco, horário fixo em vários dias, faixa fora da grade de 30 minutos, ordenação e prioridade dos motivos).
+- **6 testes de integração** da API: sobem a aplicação em memória com `WebApplicationFactory` e fazem requisições HTTP de verdade (200 com o exemplo do enunciado, 400 com todos os erros, corpo vazio, JSON malformado, método não permitido e CORS).
 
-- o idioma está vazio;
-- nenhum dia foi informado;
-- algum dia é inválido;
-- algum horário está fora do formato `HH:mm`;
-- o fim da faixa é igual ou anterior ao início;
-- a duração é diferente de 30, 60 ou 90 minutos.
+### Tela (React)
 
-### 4. Tela (React, de preferência com TypeScript)
+Dentro da pasta `web`:
 
-- **Formulário:** idioma (Inglês, Espanhol ou Francês), dias da semana, faixa de horário e duração.
-- **Resultado:** cada professor com os horários possíveis e a quantidade de aulas na semana.
-- **Estados:** carregando, nenhum professor encontrado, falha de comunicação com a API e erros de validação devolvidos pela API.
-- **Diferencial:** mostrar os professores que ficaram de fora e o motivo.
+```
+npm test
+```
 
-### 5. Testes
+São 8 testes (Vitest + Testing Library) que simulam o uso da tela: preenchem o formulário, clicam em buscar e conferem o que aparece. A API é simulada em cada teste, o que permite cobrir todos os estados: envio dos dados corretos, professores disponíveis e os que ficaram de fora, nenhum professor encontrado, erros de validação, falha de comunicação, carregando, resposta em formato inesperado e erro 500.
 
-No mínimo **5 testes automatizados em C#** sobre as regras da busca. Os testes não devem depender de subir a API.
+## Estrutura
 
-## Se algo não estiver coberto
+```
+src/
+  EncontreProfessor.Core/   regras de negócio: modelos, validação e busca (sem dependência de web)
+  EncontreProfessor.Api/    camada HTTP: endpoint, leitura do professores.json, CORS
+tests/
+  EncontreProfessor.Tests/  testes de unidade do Core e testes de integração da API
+web/                        tela em React + TypeScript (Vite), com testes em src/App.test.tsx
+professores.json            dados dos professores
+api.http                    exemplos de requisição à API
+```
 
-Se encontrar uma situação que as regras não cobrem, decida, implemente e registre a decisão no README. Isso faz parte da avaliação.
+A regra de negócio fica no `Core`, que não conhece HTTP, JSON nem arquivos. A API só valida a requisição, chama o `Core` e devolve a resposta.
 
-## Entrega
+## Como a busca funciona
 
-- **`README.md`** no seu repositório, com: como rodar a API e a tela, as decisões que você tomou e o que ficou faltando.
-- **`USO_DE_IA.md`**, com: quais ferramentas de IA você usou, como usou e **pelo menos um caso em que a IA errou** e como você percebeu. Usar IA é permitido; o que avaliamos é se você entende tudo o que entregou.
+1. Todos os horários são convertidos para minutos desde 00:00 (`18:30` vira `1110`), o que torna as comparações simples.
+2. Para cada dia pedido, são testados os inícios possíveis de 30 em 30 minutos dentro da faixa do aluno. Um início é válido se a aula inteira cabe em um único bloco de disponibilidade e não se sobrepõe a nenhuma aula marcada.
+3. A sobreposição usa comparação estrita (`inicio < fimMarcada && inicioMarcada < fimNova`), então aulas que apenas se encostam são permitidas.
+4. Como o horário é fixo, os horários finais são a interseção dos inícios válidos em todos os dias pedidos.
+5. Os motivos de não elegibilidade são testados na ordem do enunciado (idioma, agenda bloqueada, horário), e o primeiro que falhar é informado.
 
-## O que vamos avaliar
+## Decisões tomadas
 
-1. As regras estão corretas, inclusive nos casos de fronteira.
-2. Os testes provam as regras.
-3. O código é organizado, com a regra de negócio separada da camada HTTP.
-4. A validação e o tratamento de erros funcionam.
-5. A tela cobre todos os estados.
-6. O README é claro e registra as decisões.
+Situações que o enunciado não cobre, e o que decidi:
 
-Na entrevista técnica, você vai apresentar a solução e fazer uma pequena alteração ao vivo.
+- **Idioma:** comparado sem diferenciar maiúsculas, acentos e espaços nas pontas. `ingles`, `Inglês` e `INGLÊS ` encontram o mesmo professor.
+- **Dias da semana:** também aceitos sem diferenciar maiúsculas e acentos (`Terça` vira `terca`). Dias repetidos na requisição contam uma vez só.
+- **Início da faixa fora da grade:** se a faixa começa em um horário quebrado, como `18:15`, o primeiro início considerado é o próximo `:00` ou `:30` (`18:30`). A aula também precisa terminar dentro da faixa.
+- **`aulasNaSemana`:** conta todas as aulas marcadas do professor na semana, não só as dos dias pedidos, já que o campo se chama "na semana".
+- **Desempate na ordenação:** depois da quantidade de aulas, ordena pelo nome sem diferenciar acentos e maiúsculas (para `Fábio` ficar junto do `F`). Se ainda houver empate, usa o nome exato e depois o `id`, para o resultado ser sempre o mesmo.
+- **Horário `24:00`:** recusado. O formato aceito é `HH:mm` de `00:00` a `23:59`, já que nada atravessa a meia-noite.
+- **Erros de validação:** a API reúne todos os erros da requisição e responde 400 uma única vez, no formato `{ "erros": ["...", "..."] }`, para a tela mostrar tudo de uma vez.
+- **Corpo vazio:** responde 400 com "O corpo da requisição é obrigatório.". JSON malformado também gera 400, tratado pelo próprio ASP.NET; a tela mostra o código do erro nesse caso.
+- **Professor sem disponibilidade em um dos dias pedidos:** entra em `naoElegiveis` com "Sem horário em comum nos dias pedidos".
+- **Dados:** o `professores.json` é lido uma única vez na inicialização e mantido em memória. O arquivo é copiado para a pasta de saída da API no build, para funcionar de qualquer diretório.
+- **Validação no formulário:** desliguei a validação nativa do navegador (`noValidate`). Assim, todas as regras ficam na API, que é a fonte única da verdade, e a tela apenas exibe as mensagens que ela devolve.
+- **Validação da resposta na tela:** antes de exibir os dados, a tela confere o formato da resposta da API. Se algo vier diferente do esperado, mostra "A API respondeu em um formato inesperado." em vez de quebrar. Usei funções de verificação próprias em vez de uma biblioteca (como Zod), porque o formato é pequeno.
+- **CORS:** liberado apenas para `http://localhost:5173`, a origem da tela em desenvolvimento.
+
+## O que ficou faltando
+
+- **Testes ponta a ponta:** os testes da tela usam uma API simulada, e os testes da API não passam pela tela. Um teste que abrisse o navegador com a API real (com Playwright, por exemplo) cobriria a integração entre as duas partes.
+- **Configuração para produção:** porta, origem do CORS e endereço da API estão ajustados para desenvolvimento local.
+- **Documentação interativa da API:** não há Swagger/OpenAPI; os exemplos estão no `api.http`.
+- **Persistência:** os professores vêm de um arquivo e ficam em memória, como o enunciado permite. Não há como cadastrar ou marcar aulas.
