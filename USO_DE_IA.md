@@ -16,6 +16,7 @@ Trabalhei de forma incremental, uma parte do sistema por vez (domínio, validaç
   - Para os campos de hora, que no meu ambiente apareciam com AM/PM, a IA sugeriu substituí-los por uma lista de horários. Avaliei que era apenas uma questão de exibição ligada ao idioma do sistema operacional, já que o valor enviado à API sempre segue o formato `HH:mm`, e mantive o campo nativo.
   - Na interface, recusei uma proposta visual que não estava coerente com o restante da tela e pedi outra abordagem.
 - **Diagnóstico de problemas:** quando algo falhava, compartilhava a saída do terminal e os erros do editor para investigar a causa com a IA, em vez de aplicar correções às cegas.
+- **Revisão da solução:** ao final, pedi à IA um guia de estudo explicando cada parte do código e as decisões tomadas, e usei esse material para revisar toda a solução antes da entrevista.
 
 ## Casos em que a IA errou
 
