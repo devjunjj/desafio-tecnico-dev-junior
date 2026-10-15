@@ -31,3 +31,5 @@ app.MapPost("/api/professores/busca", (
 });
 
 app.Run();
+
+public partial class Program { }
